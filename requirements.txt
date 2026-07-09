@@ -4,3 +4,4 @@ python-dotenv
 djangorestframework
 gunicorn
 whitenoise
+streamlit
