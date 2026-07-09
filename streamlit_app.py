@@ -21,19 +21,6 @@ client = Groq(api_key=GROQ_API_KEY)
 
 st.set_page_config(page_title="Legal & Wellness AI", page_icon="⚖️")
 
-# Custom CSS for better UI
-st.markdown("""
-    <style>
-    .stApp {
-        max-width: 800px;
-        margin: 0 auto;
-    }
-    .stRadio > div {
-        gap: 20px;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 st.title("⚖️ Legal & 🌿 Wellness AI Assistant")
 
 # Mode selection
@@ -63,15 +50,9 @@ if prompt := st.chat_input("Type your message..."):
     
     # System prompt based on mode
     if mode == "⚖️ Legal":
-        system_prompt = """You are a Legal Information Assistant. 
-Only answer questions about legal topics (contracts, IP, courts, laws, etc.).
-If the user asks about health or wellness, say: I'm in Legal Mode. Please switch to Wellness Mode.
-Always add: For professional legal advice, consult an attorney."""
+        system_prompt = "You are a Legal Information Assistant. Only answer legal questions. If asked about wellness, say: I'm in Legal Mode. Please switch to Wellness Mode. Always add: For professional legal advice, consult an attorney."
     else:
-        system_prompt = """You are a Wellness Information Assistant.
-Only answer questions about wellness, mental health, stress, anxiety, sleep, etc.
-If the user asks about legal topics, say: I'm in Wellness Mode. Please switch to Legal Mode.
-Always add: For professional health advice, consult a doctor."""
+        system_prompt = "You are a Wellness Information Assistant. Only answer wellness questions. If asked about legal, say: I'm in Wellness Mode. Please switch to Legal Mode. Always add: For professional health advice, consult a doctor."
     
     # Get response
     with st.chat_message("assistant"):
