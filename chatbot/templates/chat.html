@@ -5,69 +5,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* ===== Light Mode (Default) ===== */
+        :root {
+            --bg-primary: #f0f4f8;
+            --bg-secondary: #ffffff;
+            --bg-chat: #fafafa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --bubble-user: #1a2a6c;
+            --bubble-bot: #ffffff;
+            --shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        /* ===== Dark Mode ===== */
+        [data-theme="dark"] {
+            --bg-primary: #1a1a2e;
+            --bg-secondary: #16213e;
+            --bg-chat: #1a1a2e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --border-color: #2a2a4a;
+            --bubble-user: #4a6fa5;
+            --bubble-bot: #2a2a4a;
+            --shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f4f8;
+            background: var(--bg-primary);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             padding: 20px;
+            transition: background 0.3s ease;
         }
-        
+
         .container {
             width: 650px;
             max-width: 100%;
-            background: white;
+            background: var(--bg-secondary);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            box-shadow: var(--shadow);
             overflow: hidden;
+            transition: all 0.3s ease;
         }
-        
+
         .header {
             background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             color: white;
             padding: 25px 20px;
             text-align: center;
+            position: relative;
         }
-        
+
         .header h2 {
             margin: 0;
             font-size: 28px;
             font-weight: 700;
         }
-        
+
         .header p {
             margin: 5px 0 0;
             opacity: 0.9;
             font-size: 15px;
         }
-        
+
+        /* ===== Dark Mode Toggle Button ===== */
+        .theme-toggle {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+
         .mode-badge {
             text-align: center;
             padding: 8px;
-            background: #f8f9fa;
+            background: var(--bg-chat);
             font-size: 14px;
             font-weight: 600;
-            color: #333;
-            border-bottom: 1px solid #e9ecef;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
-        
+
         .mode-switch {
             display: flex;
             justify-content: center;
             gap: 12px;
             padding: 15px;
-            background: #f8f9fa;
-            border-bottom: 1px solid #e9ecef;
+            background: var(--bg-chat);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
-        
+
         .mode-btn {
             padding: 10px 28px;
             border: 2px solid transparent;
@@ -77,52 +128,53 @@
             font-size: 14px;
             transition: all 0.3s ease;
         }
-        
+
         .mode-btn:hover {
             transform: scale(1.05);
         }
-        
+
         .mode-btn.active-legal {
             background: #1a2a6c;
             color: white;
             border-color: #1a2a6c;
             box-shadow: 0 4px 15px rgba(26, 42, 108, 0.3);
         }
-        
+
         .mode-btn.active-wellness {
             background: #2e7d32;
             color: white;
             border-color: #2e7d32;
             box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
         }
-        
+
         .mode-btn.inactive {
-            background: #e9ecef;
-            color: #6c757d;
-            border-color: #dee2e6;
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+            border-color: var(--border-color);
         }
-        
+
         .chat-box {
             height: 420px;
             overflow-y: auto;
             padding: 20px;
-            background: #fafafa;
+            background: var(--bg-chat);
+            transition: all 0.3s ease;
         }
-        
+
         .message {
             margin-bottom: 16px;
             display: flex;
             flex-direction: column;
         }
-        
+
         .message.user {
             align-items: flex-end;
         }
-        
+
         .message.bot {
             align-items: flex-start;
         }
-        
+
         .bubble {
             max-width: 78%;
             padding: 12px 18px;
@@ -132,59 +184,67 @@
             word-wrap: break-word;
             white-space: pre-wrap;
         }
-        
+
         .user .bubble {
-            background: #1a2a6c;
+            background: var(--bubble-user);
             color: white;
             border-bottom-right-radius: 4px;
         }
-        
+
         .bot .bubble {
-            background: white;
-            color: #212529;
-            border: 1px solid #dee2e6;
+            background: var(--bubble-bot);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
             border-bottom-left-radius: 4px;
         }
-        
+
         .sentiment-tag {
             font-size: 11px;
             margin-top: 5px;
             opacity: 0.7;
-            color: #6c757d;
+            color: var(--text-secondary);
         }
-        
+
         .status-bar {
             text-align: center;
             font-size: 13px;
-            color: #6c757d;
+            color: var(--text-secondary);
             padding: 10px;
-            background: #f8f9fa;
-            border-top: 1px solid #e9ecef;
-            border-bottom: 1px solid #e9ecef;
+            background: var(--bg-chat);
+            border-top: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
         }
-        
+
         .input-area {
             display: flex;
             padding: 15px 20px;
-            background: white;
+            background: var(--bg-secondary);
             gap: 12px;
             align-items: center;
+            transition: all 0.3s ease;
         }
-        
+
         .input-area input {
             flex: 1;
             padding: 12px 20px;
-            border: 2px solid #dee2e6;
+            border: 2px solid var(--border-color);
             border-radius: 25px;
             outline: none;
             font-size: 15px;
-            transition: border-color 0.3s;
+            background: var(--bg-chat);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
         }
-        
+
         .input-area input:focus {
             border-color: #1a2a6c;
         }
-        
+
+        .input-area input::placeholder {
+            color: var(--text-secondary);
+        }
+
         .input-area button {
             padding: 12px 32px;
             background: #1a2a6c;
@@ -197,42 +257,42 @@
             transition: all 0.3s;
             white-space: nowrap;
         }
-        
+
         .input-area button:hover:not(:disabled) {
             background: #2a3a8c;
             transform: scale(1.02);
         }
-        
+
         .input-area button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
-        
+
         .typing {
-            color: #6c757d;
+            color: var(--text-secondary);
             font-style: italic;
             padding: 8px 16px;
         }
-        
+
         /* Scrollbar styling */
         .chat-box::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .chat-box::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: var(--bg-chat);
             border-radius: 10px;
         }
-        
+
         .chat-box::-webkit-scrollbar-thumb {
-            background: #c1c7cd;
+            background: var(--border-color);
             border-radius: 10px;
         }
-        
+
         .chat-box::-webkit-scrollbar-thumb:hover {
             background: #a8b0b8;
         }
-        
+
         @media (max-width: 480px) {
             .mode-switch {
                 flex-wrap: wrap;
@@ -252,6 +312,12 @@
             .input-area button {
                 flex: 1;
             }
+            .theme-toggle {
+                top: 10px;
+                right: 10px;
+                font-size: 20px;
+                padding: 6px 10px;
+            }
         }
     </style>
 </head>
@@ -261,25 +327,26 @@
     <div class="header">
         <h2>⚖️ Legal & 🌿 Wellness AI</h2>
         <p>Your emotionally intelligent assistant</p>
+        <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌙</button>
     </div>
-    
+
     <!-- Mode Badge -->
     <div class="mode-badge">
         Current Mode: <span id="modeDisplay">⚖️ Legal</span>
     </div>
-    
+
     <!-- Mode Switch -->
     <div class="mode-switch">
         <button id="legalBtn" class="mode-btn active-legal">⚖️ Legal Mode</button>
         <button id="wellnessBtn" class="mode-btn inactive">🌿 Wellness Mode</button>
     </div>
-    
+
     <!-- Chat Box -->
     <div id="chatBox" class="chat-box"></div>
-    
+
     <!-- Status Bar -->
     <div id="statusBar" class="status-bar">🤖 Sentiment: Neutral | Mode: Legal</div>
-    
+
     <!-- Input Area -->
     <div class="input-area">
         <input type="text" id="userInput" placeholder="Type your message..." autofocus>
@@ -288,12 +355,27 @@
 </div>
 
 <script>
-    // Configuration
+    // ===== DARK MODE =====
+    const themeToggle = document.getElementById('themeToggle');
+    
+    // Check saved theme
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    });
+
+    // ===== CHAT LOGIC =====
     let sessionId = 'user_' + Date.now();
     let currentMode = 'legal';
     let isProcessing = false;
-    
-    // DOM Elements
+
     const chatBox = document.getElementById('chatBox');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
@@ -301,8 +383,7 @@
     const legalBtn = document.getElementById('legalBtn');
     const wellnessBtn = document.getElementById('wellnessBtn');
     const modeDisplay = document.getElementById('modeDisplay');
-    
-    // Add initial welcome message
+
     function addWelcomeMessage() {
         const div = document.createElement('div');
         div.className = 'message bot';
@@ -310,12 +391,10 @@
         chatBox.appendChild(div);
     }
     addWelcomeMessage();
-    
-    // Add a message to the chat
+
     function addMessage(text, sender, sentiment = null) {
         const div = document.createElement('div');
         div.className = `message ${sender}`;
-        
         let html = `<div class="bubble">${escapeHtml(text)}</div>`;
         if (sentiment && sender === 'bot') {
             html += `<div class="sentiment-tag">😊 Sentiment: ${sentiment}</div>`;
@@ -324,15 +403,13 @@
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
-    
-    // Simple HTML escape to prevent XSS
+
     function escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    
-    // Show typing indicator
+
     function showTyping() {
         const div = document.createElement('div');
         div.className = 'message bot';
@@ -341,56 +418,48 @@
         chatBox.appendChild(div);
         chatBox.scrollTop = chatBox.scrollHeight;
     }
-    
+
     function removeTyping() {
         const typing = document.getElementById('typingIndicator');
         if (typing) typing.remove();
     }
-    
-    // Send message to backend
+
     async function sendMessage() {
         const msg = userInput.value.trim();
         if (!msg || isProcessing) {
             userInput.focus();
             return;
         }
-        
-        // Disable input while processing
+
         isProcessing = true;
         sendBtn.disabled = true;
         sendBtn.textContent = '⏳';
         userInput.disabled = true;
-        
-        // Add user message
+
         addMessage(msg, 'user');
         userInput.value = '';
         userInput.focus();
-        
-        // Show typing indicator
         showTyping();
-        
+
         try {
             const response = await fetch('/api/chat/', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     message: msg,
                     session_id: sessionId,
                     mode: currentMode
                 })
             });
-            
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 throw new Error(errorData.error || `HTTP ${response.status}`);
             }
-            
+
             const data = await response.json();
-            
             removeTyping();
-            
+
             if (data.response) {
                 addMessage(data.response, 'bot', data.sentiment || 'NEUTRAL');
                 statusBar.textContent = `🤖 Sentiment: ${data.sentiment || 'NEUTRAL'} | Mode: ${(data.mode || currentMode).toUpperCase()}`;
@@ -398,7 +467,7 @@
                 addMessage(`⚠️ Error: ${data.error}`, 'bot');
                 statusBar.textContent = '❌ Error';
             }
-            
+
         } catch (error) {
             removeTyping();
             addMessage(`⚠️ Cannot reach server. Make sure Django is running. Error: ${error.message}`, 'bot');
@@ -412,27 +481,21 @@
             userInput.focus();
         }
     }
-    
-    // Event Listeners
+
     sendBtn.addEventListener('click', sendMessage);
-    
+
     userInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
             sendMessage();
         }
     });
-    
-    // Mode switching
+
     function setMode(mode) {
         if (mode === currentMode || isProcessing) return;
-        
         currentMode = mode;
-        
-        // Update mode display
         modeDisplay.textContent = mode === 'legal' ? '⚖️ Legal' : '🌿 Wellness';
-        
-        // Update button styles
+
         if (mode === 'legal') {
             legalBtn.className = 'mode-btn active-legal';
             wellnessBtn.className = 'mode-btn inactive';
@@ -442,26 +505,21 @@
             wellnessBtn.className = 'mode-btn active-wellness';
             statusBar.textContent = '🔄 Switched to WELLNESS mode';
         }
-        
-        // Add system message
+
         const modeMsg = mode === 'legal' 
             ? '⚖️ Switched to Legal Mode. Ask me about contracts, terms, and legal concepts!' 
             : '🌿 Switched to Wellness Mode. How can I support your mental health today?';
         addMessage(modeMsg, 'bot');
-        
-        // Update status after a moment
+
         setTimeout(() => {
             statusBar.textContent = `🤖 Sentiment: Neutral | Mode: ${mode.toUpperCase()}`;
         }, 1500);
     }
-    
+
     legalBtn.addEventListener('click', () => setMode('legal'));
     wellnessBtn.addEventListener('click', () => setMode('wellness'));
-    
-    // Auto-focus on page load
     userInput.focus();
-    
-    // Test API connection on load
+
     async function testConnection() {
         try {
             const response = await fetch('/api/chat/', {
@@ -479,8 +537,7 @@
                 console.warn('⚠️ API returned status:', response.status);
             }
         } catch (error) {
-            console.error('❌ Cannot connect to server. Make sure Django is running on port 8000');
-            // Only show error if no messages exist yet
+            console.error('❌ Cannot connect to server.');
             if (chatBox.children.length <= 1) {
                 addMessage('⚠️ Cannot connect to server. Please run: python manage.py runserver', 'bot');
             }

@@ -46,7 +46,7 @@ WELLNESS_KEYWORDS = [
     'meditation', 'mindfulness', 'therapy', 'mental health', 'wellness',
     'motivation', 'anger', 'sadness', 'panic', 'relax', 'exercise',
     'nutrition', 'hydration', 'self-care', 'boundaries', 'wellness',
-    'mental', 'health', 'feel', 'emotion'
+    'mental', 'health', 'feel', 'emotion','headache'
 ]
 
 def detect_domain(text):
