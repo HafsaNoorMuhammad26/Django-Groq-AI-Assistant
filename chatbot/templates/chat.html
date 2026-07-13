@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        /* ===== Light Mode (Default) ===== */
+        /* ===== LIGHT MODE (Default) ===== */
         :root {
             --bg-primary: #f0f4f8;
             --bg-secondary: #ffffff;
@@ -16,9 +16,10 @@
             --bubble-user: #1a2a6c;
             --bubble-bot: #ffffff;
             --shadow: 0 20px 60px rgba(0,0,0,0.15);
+            --header-gradient: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
         }
 
-        /* ===== Dark Mode ===== */
+        /* ===== DARK MODE ===== */
         [data-theme="dark"] {
             --bg-primary: #1a1a2e;
             --bg-secondary: #16213e;
@@ -29,6 +30,7 @@
             --bubble-user: #4a6fa5;
             --bubble-bot: #2a2a4a;
             --shadow: 0 20px 60px rgba(0,0,0,0.5);
+            --header-gradient: linear-gradient(135deg, #0d1b3e, #6a1a1a, #8a6a1a);
         }
 
         * {
@@ -49,7 +51,7 @@
         }
 
         .container {
-            width: 650px;
+            width: 700px;
             max-width: 100%;
             background: var(--bg-secondary);
             border-radius: 20px;
@@ -59,36 +61,35 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            background: var(--header-gradient);
             color: white;
-            padding: 25px 20px;
+            padding: 20px 20px;
             text-align: center;
             position: relative;
         }
 
         .header h2 {
             margin: 0;
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 700;
         }
 
         .header p {
-            margin: 5px 0 0;
+            margin: 3px 0 0;
             opacity: 0.9;
-            font-size: 15px;
+            font-size: 13px;
         }
 
-        /* ===== Dark Mode Toggle Button ===== */
         .theme-toggle {
             position: absolute;
-            top: 15px;
-            right: 20px;
+            top: 12px;
+            right: 15px;
             background: rgba(255,255,255,0.2);
             border: none;
             color: white;
-            font-size: 24px;
+            font-size: 22px;
             cursor: pointer;
-            padding: 8px 12px;
+            padding: 6px 10px;
             border-radius: 50%;
             transition: all 0.3s ease;
         }
@@ -100,9 +101,9 @@
 
         .mode-badge {
             text-align: center;
-            padding: 8px;
+            padding: 6px;
             background: var(--bg-chat);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text-primary);
             border-bottom: 1px solid var(--border-color);
@@ -112,20 +113,20 @@
         .mode-switch {
             display: flex;
             justify-content: center;
-            gap: 12px;
-            padding: 15px;
+            gap: 10px;
+            padding: 12px;
             background: var(--bg-chat);
             border-bottom: 1px solid var(--border-color);
             transition: all 0.3s ease;
         }
 
         .mode-btn {
-            padding: 10px 28px;
+            padding: 8px 22px;
             border: 2px solid transparent;
             border-radius: 25px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 14px;
+            font-size: 13px;
             transition: all 0.3s ease;
         }
 
@@ -137,14 +138,12 @@
             background: #1a2a6c;
             color: white;
             border-color: #1a2a6c;
-            box-shadow: 0 4px 15px rgba(26, 42, 108, 0.3);
         }
 
         .mode-btn.active-wellness {
             background: #2e7d32;
             color: white;
             border-color: #2e7d32;
-            box-shadow: 0 4px 15px rgba(46, 125, 50, 0.3);
         }
 
         .mode-btn.inactive {
@@ -153,16 +152,17 @@
             border-color: var(--border-color);
         }
 
+        /* ===== CHAT BOX ===== */
         .chat-box {
-            height: 420px;
+            height: 380px;
             overflow-y: auto;
-            padding: 20px;
+            padding: 15px 20px;
             background: var(--bg-chat);
             transition: all 0.3s ease;
         }
 
         .message {
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             display: flex;
             flex-direction: column;
         }
@@ -177,10 +177,10 @@
 
         .bubble {
             max-width: 78%;
-            padding: 12px 18px;
+            padding: 10px 16px;
             border-radius: 18px;
-            font-size: 15px;
-            line-height: 1.6;
+            font-size: 14px;
+            line-height: 1.5;
             word-wrap: break-word;
             white-space: pre-wrap;
         }
@@ -199,17 +199,17 @@
         }
 
         .sentiment-tag {
-            font-size: 11px;
-            margin-top: 5px;
+            font-size: 10px;
+            margin-top: 4px;
             opacity: 0.7;
             color: var(--text-secondary);
         }
 
         .status-bar {
             text-align: center;
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
-            padding: 10px;
+            padding: 6px;
             background: var(--bg-chat);
             border-top: 1px solid var(--border-color);
             border-bottom: 1px solid var(--border-color);
@@ -218,20 +218,20 @@
 
         .input-area {
             display: flex;
-            padding: 15px 20px;
+            padding: 12px 18px;
             background: var(--bg-secondary);
-            gap: 12px;
+            gap: 10px;
             align-items: center;
             transition: all 0.3s ease;
         }
 
         .input-area input {
             flex: 1;
-            padding: 12px 20px;
+            padding: 10px 18px;
             border: 2px solid var(--border-color);
             border-radius: 25px;
             outline: none;
-            font-size: 15px;
+            font-size: 14px;
             background: var(--bg-chat);
             color: var(--text-primary);
             transition: all 0.3s ease;
@@ -246,14 +246,14 @@
         }
 
         .input-area button {
-            padding: 12px 32px;
+            padding: 10px 24px;
             background: #1a2a6c;
             color: white;
             border: none;
             border-radius: 25px;
             cursor: pointer;
             font-weight: 600;
-            font-size: 15px;
+            font-size: 14px;
             transition: all 0.3s;
             white-space: nowrap;
         }
@@ -268,86 +268,110 @@
             cursor: not-allowed;
         }
 
+        /* ===== ACTION BUTTONS ===== */
+        .actions {
+            display: flex;
+            gap: 8px;
+            padding: 10px 18px;
+            background: var(--bg-secondary);
+            border-top: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn {
+            padding: 6px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            background: var(--bg-chat);
+            color: var(--text-primary);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn:hover {
+            background: var(--bubble-user);
+            color: white;
+            border-color: var(--bubble-user);
+        }
+
+        .action-btn.danger:hover {
+            background: #dc3545;
+            border-color: #dc3545;
+        }
+
         .typing {
             color: var(--text-secondary);
             font-style: italic;
-            padding: 8px 16px;
+            padding: 6px 14px;
+            font-size: 13px;
         }
 
-        /* Scrollbar styling */
+        /* ===== SCROLLBAR ===== */
         .chat-box::-webkit-scrollbar {
             width: 6px;
         }
-
         .chat-box::-webkit-scrollbar-track {
             background: var(--bg-chat);
             border-radius: 10px;
         }
-
         .chat-box::-webkit-scrollbar-thumb {
             background: var(--border-color);
             border-radius: 10px;
         }
-
         .chat-box::-webkit-scrollbar-thumb:hover {
             background: #a8b0b8;
         }
 
         @media (max-width: 480px) {
-            .mode-switch {
-                flex-wrap: wrap;
-            }
-            .mode-btn {
-                flex: 1;
-                text-align: center;
-                padding: 8px 16px;
-                font-size: 13px;
-            }
-            .input-area {
-                flex-wrap: wrap;
-            }
-            .input-area input {
-                flex: 1 1 100%;
-            }
-            .input-area button {
-                flex: 1;
-            }
-            .theme-toggle {
-                top: 10px;
-                right: 10px;
-                font-size: 20px;
-                padding: 6px 10px;
-            }
+            .mode-switch { flex-wrap: wrap; }
+            .mode-btn { flex: 1; text-align: center; padding: 6px 12px; font-size: 12px; }
+            .input-area { flex-wrap: wrap; }
+            .input-area input { flex: 1 1 100%; }
+            .input-area button { flex: 1; }
+            .actions { justify-content: center; }
+            .theme-toggle { top: 8px; right: 8px; font-size: 18px; padding: 4px 8px; }
+            .header h2 { font-size: 20px; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <!-- Header -->
+    <!-- ===== HEADER ===== -->
     <div class="header">
         <h2>⚖️ Legal & 🌿 Wellness AI</h2>
         <p>Your emotionally intelligent assistant</p>
         <button class="theme-toggle" id="themeToggle" title="Toggle Dark Mode">🌙</button>
     </div>
 
-    <!-- Mode Badge -->
+    <!-- ===== MODE BADGE ===== -->
     <div class="mode-badge">
         Current Mode: <span id="modeDisplay">⚖️ Legal</span>
     </div>
 
-    <!-- Mode Switch -->
+    <!-- ===== MODE SWITCH ===== -->
     <div class="mode-switch">
         <button id="legalBtn" class="mode-btn active-legal">⚖️ Legal Mode</button>
         <button id="wellnessBtn" class="mode-btn inactive">🌿 Wellness Mode</button>
     </div>
 
-    <!-- Chat Box -->
+    <!-- ===== CHAT BOX ===== -->
     <div id="chatBox" class="chat-box"></div>
 
-    <!-- Status Bar -->
+    <!-- ===== STATUS BAR ===== -->
     <div id="statusBar" class="status-bar">🤖 Sentiment: Neutral | Mode: Legal</div>
 
-    <!-- Input Area -->
+    <!-- ===== ACTION BUTTONS ===== -->
+    <div class="actions">
+        <button class="action-btn" id="exportTextBtn">📄 Export as Text</button>
+        <button class="action-btn" id="exportPdfBtn">📕 Export as PDF</button>
+        <button class="action-btn" id="exportJsonBtn">📊 Export as JSON</button>
+        <button class="action-btn danger" id="clearChatBtn">🗑️ Clear Chat</button>
+    </div>
+
+    <!-- ===== INPUT AREA ===== -->
     <div class="input-area">
         <input type="text" id="userInput" placeholder="Type your message..." autofocus>
         <button id="sendBtn">Send</button>
@@ -355,10 +379,10 @@
 </div>
 
 <script>
+    // =============================================
     // ===== DARK MODE =====
+    // =============================================
     const themeToggle = document.getElementById('themeToggle');
-    
-    // Check saved theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
     themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
@@ -371,7 +395,9 @@
         themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
     });
 
+    // =============================================
     // ===== CHAT LOGIC =====
+    // =============================================
     let sessionId = 'user_' + Date.now();
     let currentMode = 'legal';
     let isProcessing = false;
@@ -384,6 +410,7 @@
     const wellnessBtn = document.getElementById('wellnessBtn');
     const modeDisplay = document.getElementById('modeDisplay');
 
+    // Welcome message
     function addWelcomeMessage() {
         const div = document.createElement('div');
         div.className = 'message bot';
@@ -424,6 +451,9 @@
         if (typing) typing.remove();
     }
 
+    // =============================================
+    // ===== SEND MESSAGE =====
+    // =============================================
     async function sendMessage() {
         const msg = userInput.value.trim();
         if (!msg || isProcessing) {
@@ -491,6 +521,9 @@
         }
     });
 
+    // =============================================
+    // ===== MODE SWITCHING =====
+    // =============================================
     function setMode(mode) {
         if (mode === currentMode || isProcessing) return;
         currentMode = mode;
@@ -520,6 +553,104 @@
     wellnessBtn.addEventListener('click', () => setMode('wellness'));
     userInput.focus();
 
+    // =============================================
+    // ===== EXPORT FUNCTIONS =====
+    // =============================================
+    function getMessages() {
+        const messages = [];
+        const messageElements = chatBox.querySelectorAll('.message');
+        messageElements.forEach(el => {
+            const bubble = el.querySelector('.bubble');
+            if (bubble) {
+                const text = bubble.textContent;
+                const role = el.classList.contains('user') ? 'user' : 'assistant';
+                // Skip welcome message and system messages
+                if (text.includes('Hello! I\'m your AI companion') || 
+                    text.includes('Switched to') ||
+                    text.includes('Chat cleared')) {
+                    return;
+                }
+                messages.push({ role, content: text });
+            }
+        });
+        return messages;
+    }
+
+    function getFormattedText() {
+        const messages = getMessages();
+        let lines = [];
+        lines.push('=' .repeat(50));
+        lines.push('Legal & Wellness AI - Chat Export');
+        lines.push(`Date: ${new Date().toLocaleString()}`);
+        lines.push('=' .repeat(50));
+        lines.push('');
+        
+        messages.forEach(msg => {
+            const role = msg.role === 'user' ? 'User' : 'Assistant';
+            lines.push(`${role}: ${msg.content}`);
+            lines.push('-'.repeat(40));
+        });
+        
+        lines.push('');
+        lines.push('=' .repeat(50));
+        lines.push('End of conversation');
+        lines.push('For professional advice, consult a licensed professional.');
+        
+        return lines.join('\n');
+    }
+
+    function exportText() {
+        const content = getFormattedText();
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_export_${Date.now()}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function exportJSON() {
+        const messages = getMessages();
+        const data = {
+            export_date: new Date().toISOString(),
+            messages: messages
+        };
+        const json = JSON.stringify(data, null, 2);
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_export_${Date.now()}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function clearChat() {
+        if (confirm('Are you sure you want to clear the chat?')) {
+            // Remove all messages except welcome
+            const messages = chatBox.querySelectorAll('.message');
+            messages.forEach(msg => {
+                const bubble = msg.querySelector('.bubble');
+                if (bubble && !bubble.textContent.includes('Hello! I\'m your AI companion')) {
+                    msg.remove();
+                }
+            });
+            addMessage('Chat cleared! Start a new conversation. 🌟', 'bot');
+            statusBar.textContent = '🗑️ Chat cleared';
+        }
+    }
+
+    // =============================================
+    // ===== EVENT LISTENERS FOR ACTIONS =====
+    // =============================================
+    document.getElementById('exportTextBtn').addEventListener('click', exportText);
+    document.getElementById('exportJsonBtn').addEventListener('click', exportJSON);
+    document.getElementById('clearChatBtn').addEventListener('click', clearChat);
+
+    // =============================================
+    // ===== TEST CONNECTION =====
+    // =============================================
     async function testConnection() {
         try {
             const response = await fetch('/api/chat/', {
@@ -543,6 +674,120 @@
             }
         }
     }
+
+    // =============================================
+// ===== PDF EXPORT =====
+// =============================================
+async function exportPDF() {
+    try {
+        const response = await fetch('/api/export/pdf/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'PDF export failed');
+        }
+        
+        // Download PDF
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_export_${Date.now()}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        statusBar.textContent = '✅ PDF exported successfully!';
+        
+    } catch (error) {
+        console.error('PDF export error:', error);
+        statusBar.textContent = '❌ PDF export failed: ' + error.message;
+        addMessage(`⚠️ PDF Export Error: ${error.message}`, 'bot');
+    }
+}
+
+// =============================================
+// ===== TEXT EXPORT =====
+// =============================================
+async function exportText() {
+    try {
+        const response = await fetch('/api/export/text/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'Text export failed');
+        }
+        
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_export_${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        statusBar.textContent = '✅ Text exported successfully!';
+        
+    } catch (error) {
+        console.error('Text export error:', error);
+        statusBar.textContent = '❌ Text export failed: ' + error.message;
+        addMessage(`⚠️ Text Export Error: ${error.message}`, 'bot');
+    }
+}
+
+// =============================================
+// ===== JSON EXPORT =====
+// =============================================
+async function exportJSON() {
+    try {
+        const response = await fetch('/api/export/json/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ session_id: sessionId })
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.error || 'JSON export failed');
+        }
+        
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_export_${Date.now()}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        statusBar.textContent = '✅ JSON exported successfully!';
+        
+    } catch (error) {
+        console.error('JSON export error:', error);
+        statusBar.textContent = '❌ JSON export failed: ' + error.message;
+        addMessage(`⚠️ JSON Export Error: ${error.message}`, 'bot');
+    }
+}
+
+// =============================================
+// ===== EVENT LISTENERS =====
+// =============================================
+document.getElementById('exportTextBtn').addEventListener('click', exportText);
+document.getElementById('exportPdfBtn').addEventListener('click', exportPDF);
+document.getElementById('exportJsonBtn').addEventListener('click', exportJSON);
+document.getElementById('clearChatBtn').addEventListener('click', clearChat);
     testConnection();
 </script>
 </body>
