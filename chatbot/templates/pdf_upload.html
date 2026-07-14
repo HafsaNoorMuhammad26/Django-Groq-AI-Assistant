@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PDF Legal Analysis</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: 700px;
+            max-width: 100%;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            overflow: hidden;
+            padding: 30px;
+        }
+        .header {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        .header h2 { margin: 0; font-size: 24px; }
+        .header p { margin: 5px 0 0; opacity: 0.9; font-size: 14px; }
+        
+        .theme-toggle {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 50%;
+        }
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .upload-area {
+            border: 3px dashed #dee2e6;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #f8f9fa;
+        }
+        .upload-area:hover {
+            border-color: #1a2a6c;
+            background: #e9ecef;
+        }
+        .upload-area.dragover {
+            border-color: #1a2a6c;
+            background: #e9ecef;
+        }
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+        .upload-text {
+            color: #6c757d;
+            font-size: 16px;
+        }
+        .upload-text strong {
+            color: #1a2a6c;
+        }
+        
+        .file-info {
+            display: none;
+            padding: 15px;
+            background: #e9ecef;
+            border-radius: 10px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .file-info.show {
+            display: block;
+        }
+        .file-name {
+            font-weight: 600;
+            color: #1a2a6c;
+        }
+        .file-size {
+            color: #6c757d;
+            font-size: 12px;
+        }
+        
+        .analyze-btn {
+            background: #1a2a6c;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: 15px;
+            width: 100%;
+        }
+        .analyze-btn:hover:not(:disabled) {
+            background: #2a3a8c;
+            transform: scale(1.02);
+        }
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .loading.show {
+            display: block;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1a2a6c;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .analysis-result {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #1a2a6c;
+        }
+        .analysis-result.show {
+            display: block;
+        }
+        .analysis-result h3 {
+            color: #1a2a6c;
+            margin-bottom: 10px;
+        }
+        .analysis-result .content {
+            white-space: pre-wrap;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+        
+        .back-btn {
+            display: inline-block;
+            margin-top: 15px;
+            color: #1a2a6c;
+            text-decoration: none;
+            font-weight: 600;
+        }
+        .back-btn:hover {
+            text-decoration: underline;
+        }
+        
+        .error-msg {
+            color: #dc3545;
+            background: #f8d7da;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-msg.show {
+            display: block;
+        }
+        
+        /* Dark Mode */
+        [data-theme="dark"] body {
+            background: #1a1a2e;
+        }
+        [data-theme="dark"] .container {
+            background: #16213e;
+        }
+        [data-theme="dark"] .upload-area {
+            background: #1a1a2e;
+            border-color: #2a2a4a;
+        }
+        [data-theme="dark"] .upload-area:hover {
+            background: #2a2a4a;
+        }
+        [data-theme="dark"] .upload-text {
+            color: #a0a0a0;
+        }
+        [data-theme="dark"] .file-info {
+            background: #1a1a2e;
+        }
+        [data-theme="dark"] .analysis-result {
+            background: #1a1a2e;
+        }
+        [data-theme="dark"] .analysis-result h3 {
+            color: #4a6fa5;
+        }
+        [data-theme="dark"] .analysis-result .content {
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] .error-msg {
+            background: #2a1a1a;
+            color: #ff6b6b;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h2>📄 PDF Legal Analysis</h2>
+        <p>Upload a legal document for AI analysis</p>
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+    </div>
+
+    <!-- Upload Area -->
+    <div class="upload-area" id="uploadArea">
+        <div class="upload-icon">📤</div>
+        <div class="upload-text">
+            <strong>Click to upload</strong> or drag and drop<br>
+            <small style="color:#6c757d;">PDF files only (Max 10MB)</small>
+        </div>
+        <input type="file" id="fileInput" accept=".pdf">
+    </div>
+
+    <!-- File Info -->
+    <div class="file-info" id="fileInfo">
+        <div>📄 <span class="file-name" id="fileName">document.pdf</span></div>
+        <div class="file-size" id="fileSize">0 KB</div>
+    </div>
+
+    <!-- Error Message -->
+    <div class="error-msg" id="errorMsg"></div>
+
+    <!-- Analyze Button -->
+    <button class="analyze-btn" id="analyzeBtn" disabled>🔍 Analyze Document</button>
+
+    <!-- Loading -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p style="color:#6c757d;">Analyzing document... This may take a moment.</p>
+    </div>
+
+    <!-- Analysis Result -->
+    <div class="analysis-result" id="analysisResult">
+        <h3>📋 Analysis Result</h3>
+        <div class="content" id="analysisContent"></div>
+        <button class="analyze-btn" onclick="copyAnalysis()" style="margin-top:10px;">📋 Copy Analysis</button>
+    </div>
+
+    <a href="/" class="back-btn">← Back to Chat</a>
+</div>
+
+<script>
+    // ===== DARK MODE =====
+    const themeToggle = document.getElementById('themeToggle');
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    themeToggle.textContent = savedTheme === 'dark' ? '☀️' : '🌙';
+
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        themeToggle.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+    });
+
+    // ===== CSRF TOKEN =====
+    function getCSRFToken() {
+        let cookieValue = null;
+        const cookies = document.cookie.split(';');
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+            if (cookie.startsWith('csrftoken=')) {
+                cookieValue = cookie.substring('csrftoken='.length);
+                break;
+            }
+        }
+        return cookieValue;
+    }
+
+    // ===== DOM ELEMENTS =====
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const analyzeBtn = document.getElementById('analyzeBtn');
+    const loading = document.getElementById('loading');
+    const analysisResult = document.getElementById('analysisResult');
+    const analysisContent = document.getElementById('analysisContent');
+    const errorMsg = document.getElementById('errorMsg');
+
+    let selectedFile = null;
+
+    // ===== FILE UPLOAD =====
+    uploadArea.addEventListener('click', () => fileInput.click());
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        if (e.dataTransfer.files.length) {
+            handleFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length) {
+            handleFile(e.target.files[0]);
+        }
+    });
+
+    function handleFile(file) {
+        if (!file.name.toLowerCase().endsWith('.pdf')) {
+            showError('Please upload a PDF file.');
+            return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+            showError('File too large. Max size is 10MB.');
+            return;
+        }
+
+        selectedFile = file;
+        fileName.textContent = file.name;
+        fileSize.textContent = (file.size / 1024).toFixed(1) + ' KB';
+        fileInfo.classList.add('show');
+        analyzeBtn.disabled = false;
+        errorMsg.classList.remove('show');
+        analysisResult.classList.remove('show');
+    }
+
+    function showError(message) {
+        errorMsg.textContent = message;
+        errorMsg.classList.add('show');
+        setTimeout(() => errorMsg.classList.remove('show'), 8000);
+    }
+
+    // ===== ANALYZE =====
+    analyzeBtn.addEventListener('click', async () => {
+        if (!selectedFile) return;
+
+        const formData = new FormData();
+        formData.append('pdf_file', selectedFile);
+
+        analyzeBtn.disabled = true;
+        analyzeBtn.textContent = '⏳ Processing...';
+        loading.classList.add('show');
+        analysisResult.classList.remove('show');
+        errorMsg.classList.remove('show');
+
+        try {
+            const response = await fetch('/api/upload-pdf/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCSRFToken(),
+                },
+            });
+
+            // Check if response is JSON
+            const contentType = response.headers.get('content-type');
+            if (!contentType || !contentType.includes('application/json')) {
+                const text = await response.text();
+                throw new Error(`Server returned HTML (status ${response.status}). Please check the server logs.`);
+            }
+
+            const data = await response.json();
+
+            if (data.error) {
+                showError(data.error);
+            } else if (data.analysis) {
+                analysisContent.textContent = data.analysis;
+                analysisResult.classList.add('show');
+                fileInfo.classList.remove('show');
+                selectedFile = null;
+                fileInput.value = '';
+            } else {
+                showError('Unexpected response from server.');
+            }
+        } catch (error) {
+            showError('Error analyzing document: ' + error.message);
+            console.error('Analysis error:', error);
+        } finally {
+            loading.classList.remove('show');
+            analyzeBtn.disabled = false;
+            analyzeBtn.textContent = '🔍 Analyze Document';
+        }
+    });
+
+    // ===== COPY =====
+    function copyAnalysis() {
+        const text = analysisContent.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = event.target;
+            btn.textContent = '✅ Copied!';
+            setTimeout(() => btn.textContent = '📋 Copy Analysis', 2000);
+        });
+    }
+</script>
+</body>
+</html>

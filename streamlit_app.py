@@ -4,19 +4,15 @@ import os
 from dotenv import load_dotenv
 import io
 from datetime import datetime
-import re  # Add this for emoji removal
+import json
+import re
+import PyPDF2
+from io import BytesIO
 
-# ===== PDF EXPORT LIBRARY =====
-try:
-    from fpdf import FPDF
-    PDF_AVAILABLE = True
-except ImportError:
-    PDF_AVAILABLE = False
-
-# Load .env file (for local development)
+# ===== LOAD ENVIRONMENT =====
 load_dotenv()
 
-# Try to get API key from multiple sources
+# ===== INITIALIZE GROQ CLIENT =====
 try:
     GROQ_API_KEY = st.secrets["GROQ_API_KEY"]
 except:
@@ -26,7 +22,7 @@ if not GROQ_API_KEY:
     st.error("❌ GROQ_API_KEY not found! Please add it to .env or secrets.toml")
     st.stop()
 
-# Initialize Groq client
+# ✅ THIS IS THE FIX - Initialize the client
 client = Groq(api_key=GROQ_API_KEY)
 
 # ===== PAGE CONFIG =====
@@ -37,16 +33,32 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# ===== DARK MODE TOGGLE =====
+# ===== DARK MODE =====
 if "theme" not in st.session_state:
     st.session_state.theme = "light"
 
 def toggle_theme():
     st.session_state.theme = "dark" if st.session_state.theme == "light" else "light"
 
+# ===== REMOVE EMOJIS =====
+def remove_emojis(text):
+    emoji_pattern = re.compile(
+        "["
+        u"\U0001F600-\U0001F64F"
+        u"\U0001F300-\U0001F5FF"
+        u"\U0001F680-\U0001F6FF"
+        u"\U0001F1E0-\U0001F1FF"
+        u"\U00002702-\U000027B0"
+        u"\U000024C2-\U0001F251"
+        u"\U0001F900-\U0001F9FF"
+        u"\U0001FA70-\U0001FAFF"
+        "]+",
+        flags=re.UNICODE
+    )
+    return emoji_pattern.sub(r'', text).strip()
+
 # ===== EXPORT FUNCTIONS =====
 def get_chat_text():
-    """Get formatted chat text"""
     lines = []
     lines.append("=" * 50)
     lines.append("Legal & Wellness AI - Chat Export")
@@ -66,28 +78,9 @@ def get_chat_text():
     
     return "\n".join(lines)
 
-def remove_emojis(text):
-    """Remove emojis and special characters for PDF export"""
-    emoji_pattern = re.compile(
-        "["
-        u"\U0001F600-\U0001F64F"  # emoticons
-        u"\U0001F300-\U0001F5FF"  # symbols & pictographs
-        u"\U0001F680-\U0001F6FF"  # transport & map symbols
-        u"\U0001F1E0-\U0001F1FF"  # flags
-        u"\U00002702-\U000027B0"
-        u"\U000024C2-\U0001F251"
-        u"\U0001F900-\U0001F9FF"  # supplemental symbols
-        u"\U0001FA70-\U0001FAFF"  # symbols extended-a
-        "]+",
-        flags=re.UNICODE
-    )
-    return emoji_pattern.sub(r'', text).strip()
-
 def export_chat_text():
-    """Export chat as text file"""
     content = get_chat_text()
     filename = f"chat_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
-    
     st.download_button(
         label="Download Text File",
         data=content,
@@ -98,77 +91,76 @@ def export_chat_text():
     )
 
 def export_chat_pdf():
-    """Export chat as PDF with emoji support"""
-    if not PDF_AVAILABLE:
-        st.error("PDF export requires fpdf. Install: pip install fpdf")
-        return
-    
     try:
-        pdf = FPDF()
-        pdf.add_page()
+        from reportlab.lib.pagesizes import letter
+        from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.units import inch
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        from reportlab.lib import colors
         
-        # Title
-        pdf.set_font("Arial", "B", 16)
-        pdf.cell(0, 10, "Legal & Wellness AI - Chat Export", ln=True, align="C")
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buffer,
+            pagesize=letter,
+            rightMargin=72,
+            leftMargin=72,
+            topMargin=72,
+            bottomMargin=72,
+        )
         
-        pdf.set_font("Arial", "I", 10)
-        pdf.cell(0, 10, f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", ln=True, align="C")
-        pdf.ln(10)
+        styles = getSampleStyleSheet()
+        title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=18, alignment=TA_CENTER, spaceAfter=20)
+        header_style = ParagraphStyle('CustomHeader', parent=styles['Heading2'], fontSize=13, alignment=TA_LEFT, spaceAfter=6, textColor=colors.HexColor('#1a2a6c'))
+        body_style = ParagraphStyle('CustomBody', parent=styles['Normal'], fontSize=11, alignment=TA_LEFT, spaceAfter=10, leftIndent=10)
+        date_style = ParagraphStyle('CustomDate', parent=styles['Normal'], fontSize=10, alignment=TA_CENTER, textColor=colors.HexColor('#666666'), spaceAfter=20)
+        footer_style = ParagraphStyle('CustomFooter', parent=styles['Normal'], fontSize=9, alignment=TA_CENTER, textColor=colors.HexColor('#999999'), spaceAfter=6)
         
-        # Add messages (cleaned of emojis)
+        content = []
+        content.append(Paragraph("Legal & Wellness AI - Chat Export", title_style))
+        content.append(Spacer(1, 0.1 * inch))
+        
+        date_str = datetime.now().strftime('%Y-%m-%d %I:%M %p')
+        content.append(Paragraph(f"Exported on: {date_str}", date_style))
+        content.append(Spacer(1, 0.2 * inch))
+        
         for msg in st.session_state.messages:
             role = "User" if msg["role"] == "user" else "Assistant"
-            clean_content = remove_emojis(msg["content"])
-            
-            pdf.set_font("Arial", "B", 11)
-            pdf.cell(0, 8, f"{role}:", ln=True)
-            pdf.set_font("Arial", "", 10)
-            
-            # Split long messages
-            if len(clean_content) > 80:
-                pdf.multi_cell(0, 6, clean_content)
-            else:
-                pdf.cell(0, 6, clean_content, ln=True)
-            pdf.ln(4)
+            icon = "User" if msg["role"] == "user" else "Assistant"
+            content.append(Paragraph(f"{icon}:", header_style))
+            clean_content = remove_emojis(msg['content'])
+            content.append(Paragraph(clean_content, body_style))
+            content.append(Spacer(1, 0.1 * inch))
         
-        # Footer
-        pdf.set_y(-20)
-        pdf.set_font("Arial", "I", 8)
-        pdf.cell(0, 10, "For professional advice, consult a licensed professional.", ln=True, align="C")
+        content.append(Spacer(1, 0.3 * inch))
+        content.append(Paragraph("=" * 60, footer_style))
+        content.append(Paragraph("For professional advice, consult a licensed professional.", footer_style))
+        content.append(Paragraph(f"Total messages: {len(st.session_state.messages)}", footer_style))
         
-        # Generate PDF bytes
-        pdf_output = pdf.output(dest='S')
+        doc.build(content)
         
-        # Encode properly for download
-        if isinstance(pdf_output, str):
-            pdf_output = pdf_output.encode('latin-1', errors='ignore')
+        pdf_data = buffer.getvalue()
+        buffer.close()
         
         filename = f"chat_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-        
         st.download_button(
             label="Download PDF",
-            data=pdf_output,
+            data=pdf_data,
             file_name=filename,
             mime="application/pdf",
             use_container_width=True,
             key="download_pdf"
         )
-        
     except Exception as e:
-        st.error(f"Error generating PDF: {e}")
+        st.error(f"PDF export error: {e}")
 
 def export_chat_json():
-    """Export chat as JSON"""
-    import json
-    
     data = {
         "export_date": datetime.now().isoformat(),
         "messages": st.session_state.messages
     }
-    
     json_str = json.dumps(data, indent=2, ensure_ascii=False)
     filename = f"chat_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    
     st.download_button(
         label="Download JSON",
         data=json_str,
@@ -180,26 +172,23 @@ def export_chat_json():
 
 # ===== SIDEBAR =====
 with st.sidebar:
-    st.markdown("## Settings")
+    st.markdown("## ⚙️ Settings")
     if st.button("🌙" if st.session_state.theme == "light" else "☀️", help="Toggle Dark Mode"):
         toggle_theme()
         st.rerun()
     
     st.markdown("---")
-    
-    st.markdown("## Export Chat")
+    st.markdown("## 📥 Export Chat")
     
     if "messages" in st.session_state and len(st.session_state.messages) > 1:
-        if st.button("Download as Text", use_container_width=True):
+        if st.button("📄 Download as Text", use_container_width=True):
             export_chat_text()
-        
-        if st.button("Download as PDF", use_container_width=True):
+        if st.button("📕 Download as PDF", use_container_width=True):
             export_chat_pdf()
-        
-        if st.button("Download as JSON", use_container_width=True):
+        if st.button("📊 Download as JSON", use_container_width=True):
             export_chat_json()
     else:
-        st.info("Start a conversation to enable export")
+        st.info("💬 Start a conversation to enable export")
     
     st.markdown("---")
     st.markdown("### About")
@@ -267,6 +256,71 @@ with col2:
         ]
         st.rerun()
 
+# ===== PDF UPLOAD SECTION =====
+st.markdown("---")
+st.markdown("## 📄 Upload PDF for Legal Analysis")
+
+uploaded_file = st.file_uploader(
+    "Upload a legal document (PDF)",
+    type=['pdf'],
+    help="Upload contracts, agreements, or legal documents for AI analysis"
+)
+
+if uploaded_file is not None:
+    try:
+        pdf_reader = PyPDF2.PdfReader(BytesIO(uploaded_file.read()))
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
+        
+        if not text:
+            st.error("Could not extract text from PDF. Please ensure it contains readable text.")
+        else:
+            with st.expander("📄 Document Preview"):
+                st.text(text[:1000] + ("..." if len(text) > 1000 else ""))
+            
+            if st.button("🔍 Analyze Document", use_container_width=True):
+                with st.spinner("Analyzing document... This may take a moment."):
+                    analysis_prompt = f"""
+                    You are a Legal Document Analyst. Analyze the following legal document and provide:
+                    
+                    1. **Document Summary** (2-3 sentences)
+                    2. **Key Clauses** (list the most important clauses)
+                    3. **Potential Issues** (any concerning clauses or ambiguities)
+                    4. **Plain English Explanation** (explain the document in simple terms)
+                    
+                    Document:
+                    {text[:8000]}
+                    """
+                    
+                    # ✅ client is now defined!
+                    response = client.chat.completions.create(
+                        model="llama-3.3-70b-versatile",
+                        messages=[
+                            {"role": "system", "content": "You are a Legal Document Analyst. Provide structured analysis."},
+                            {"role": "user", "content": analysis_prompt}
+                        ],
+                        temperature=0.3,
+                        max_tokens=800,
+                    )
+                    
+                    analysis = response.choices[0].message.content
+                    
+                    st.markdown("### 📋 Analysis Result")
+                    st.markdown(analysis)
+                    
+                    st.download_button(
+                        label="📥 Download Analysis",
+                        data=analysis,
+                        file_name=f"analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",
+                        mime="text/plain",
+                        use_container_width=True
+                    )
+                    
+    except Exception as e:
+        st.error(f"Error reading PDF: {e}")
+
+# ===== CHAT INPUT =====
 if prompt := st.chat_input("Type your message..."):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):

@@ -365,6 +365,7 @@
 
     <!-- ===== ACTION BUTTONS ===== -->
     <div class="actions">
+        <button class="action-btn" id="pdfUploadBtn">📄 Upload PDF for Analysis</button>
         <button class="action-btn" id="exportTextBtn">📄 Export as Text</button>
         <button class="action-btn" id="exportPdfBtn">📕 Export as PDF</button>
         <button class="action-btn" id="exportJsonBtn">📊 Export as JSON</button>
@@ -644,6 +645,9 @@
     // =============================================
     // ===== EVENT LISTENERS FOR ACTIONS =====
     // =============================================
+     document.getElementById('pdfUploadBtn').addEventListener('click', () => {
+        window.location.href = '/pdf-upload/';
+    });
     document.getElementById('exportTextBtn').addEventListener('click', exportText);
     document.getElementById('exportJsonBtn').addEventListener('click', exportJSON);
     document.getElementById('clearChatBtn').addEventListener('click', clearChat);

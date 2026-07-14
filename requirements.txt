@@ -3,6 +3,10 @@ groq>=0.9.0
 python-dotenv>=1.0.0
 fpdf
 
+# ===== PDF Upload & Analysis =====
+PyPDF2
+python-docx
+
 # ===== Core Web Framework =====
 Django>=4.2.0
 djangorestframework>=3.14.0

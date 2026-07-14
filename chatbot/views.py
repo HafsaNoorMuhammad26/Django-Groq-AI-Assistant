@@ -14,6 +14,10 @@ from reportlab.lib.enums import TA_CENTER, TA_LEFT
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from .utils import generate_response, get_sentiment
+import PyPDF2
+import os
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
 
 # Store chat sessions (in-memory for development)
 chat_sessions = {}
@@ -35,6 +39,92 @@ def remove_emojis(text):
         flags=re.UNICODE
     )
     return emoji_pattern.sub(r'', text).strip()
+
+# ===== PDF UPLOAD & ANALYSIS =====
+def extract_text_from_pdf(pdf_file):
+    """Extract text from uploaded PDF"""
+    try:
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
+        return text.strip()
+    except Exception as e:
+        return None
+
+@csrf_exempt
+@require_http_methods(["POST"])
+def upload_and_analyze_pdf(request):
+    try:
+        if 'pdf_file' not in request.FILES:
+            return JsonResponse({'error': 'No PDF file uploaded'}, status=400)
+
+        pdf_file = request.FILES['pdf_file']
+
+        if pdf_file.size > 10 * 1024 * 1024:
+            return JsonResponse({'error': 'File too large. Max size is 10MB.'}, status=400)
+
+        if not pdf_file.name.endswith('.pdf'):
+            return JsonResponse({'error': 'Only PDF files are supported'}, status=400)
+
+        # Extract text
+        pdf_reader = PyPDF2.PdfReader(pdf_file)
+        text = ""
+        for page in pdf_reader.pages:
+            text += page.extract_text() + "\n"
+
+        if not text:
+            return JsonResponse({'error': 'Could not extract text from PDF.'}, status=400)
+
+        # Limit text
+        if len(text) > 10000:
+            text = text[:10000] + "... [truncated]"
+
+        # Get session ID
+        try:
+            data = json.loads(request.body)
+            session_id = data.get('session_id', 'default')
+        except:
+            session_id = 'default'
+
+        if session_id not in chat_sessions:
+            chat_sessions[session_id] = {'history': [], 'mode': 'legal'}
+
+        session = chat_sessions[session_id]
+
+        # Generate analysis
+        analysis_prompt = f"""
+        You are a Legal Document Analyst. Analyze the following legal document and provide:
+
+        1. **Document Summary** (2-3 sentences)
+        2. **Key Clauses** (list the most important clauses)
+        3. **Potential Issues** (any concerning clauses or ambiguities)
+        4. **Plain English Explanation** (explain the document in simple terms)
+
+        Document:
+        {text}
+        """
+
+        analysis_response = generate_response(analysis_prompt, mode='legal', chat_history=session['history'])
+
+        session['history'].append({
+            'user': f"[PDF Upload] {pdf_file.name}",
+            'bot': analysis_response,
+            'sentiment': 'NEUTRAL'
+        })
+
+        return JsonResponse({
+            'analysis': analysis_response,
+            'filename': pdf_file.name,
+            'success': True
+        })
+
+    except Exception as e:
+        return JsonResponse({'error': f'Analysis error: {str(e)}'}, status=500)
+    
+# ===== PDF UPLOAD UI =====
+def pdf_upload_ui(request):
+    return render(request, 'pdf_upload.html')
 
 # ===== API CHAT ENDPOINT =====
 @csrf_exempt
