@@ -1,6 +1,7 @@
 import os
 from groq import Groq
 from dotenv import load_dotenv
+import google.genai as genai
 
 # Load environment variables
 load_dotenv()
@@ -8,6 +9,16 @@ load_dotenv()
 # Initialize Groq client
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 client = Groq(api_key=GROQ_API_KEY)
+
+# Initialize Gemini (Google AI)
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+if GOOGLE_API_KEY:
+    genai_client = genai.Client(api_key=GOOGLE_API_KEY)  # ✅ New way
+    gemini_model = "gemini-1.5-flash"  # ✅ New model name
+else:
+    genai_client = None
+    gemini_model = None
+    print("⚠️ GOOGLE_API_KEY not found. Gemini features disabled.")
 
 # System prompts for different modes
 SYSTEM_PROMPTS = {
@@ -112,9 +123,53 @@ def generate_response(user_input, mode="legal", chat_history=None):
     except Exception as e:
         return f"⚠️ Error: {str(e)}. Please try again."
 
+# ===== GEMINI (GOOGLE AI) SENTIMENT ANALYSIS =====
+def get_sentiment_with_gemini(text):
+    """
+    Analyze sentiment using Google Gemini AI
+    Returns: (sentiment_label, confidence_score)
+    """
+    if not gemini_model:
+        return "NEUTRAL", 0.5
+    
+    try:
+        # Prompt for Gemini
+        prompt = f"""
+        Analyze the sentiment of this message and return ONLY a JSON response.
+        Message: "{text}"
+        
+        Return format:
+        {{
+            "sentiment": "POSITIVE" or "NEGATIVE" or "NEUTRAL",
+            "confidence": 0.0 to 1.0
+        }}
+        """
+        
+        response = gemini_model.generate_content(prompt)
+        
+        # Parse the response
+        import json
+        import re
+        
+        # Extract JSON from response
+        json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
+        if json_match:
+            data = json.loads(json_match.group())
+            sentiment = data.get("sentiment", "NEUTRAL")
+            confidence = data.get("confidence", 0.5)
+            return sentiment, confidence
+        
+        return "NEUTRAL", 0.5
+        
+    except Exception as e:
+        print(f"Gemini sentiment error: {e}")
+        return "NEUTRAL", 0.5
+
+# ===== UPDATED get_sentiment FUNCTION =====
 def get_sentiment(text):
     """
-    Placeholder for sentiment analysis
-    You can add sentiment analysis later
+    Get sentiment using Gemini AI (fallback to neutral if unavailable)
     """
+    if gemini_model:
+        return get_sentiment_with_gemini(text)
     return "NEUTRAL", 0.5

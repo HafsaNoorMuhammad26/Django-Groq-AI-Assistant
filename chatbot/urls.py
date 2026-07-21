@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
     path('', views.chat_ui, name='chat_ui'),
     path('pdf-upload/', views.pdf_upload_ui, name='pdf_upload_ui'),
@@ -9,4 +10,5 @@ urlpatterns = [
     path('api/export/pdf/', views.export_pdf, name='export_pdf'),
     path('api/export/text/', views.export_text, name='export_text'),
     path('api/export/json/', views.export_json, name='export_json'),
+    # path('test-sentry/', views.test_sentry, name='test_sentry'),  # TEMPORARY
 ]

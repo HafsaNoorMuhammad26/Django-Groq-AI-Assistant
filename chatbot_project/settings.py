@@ -12,23 +12,17 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+load_dotenv()
 
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Security settings for production
-SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-(&in^*8*x$#v)=o1!$&l!rfagb9q+r_#djfm6utbs-!hw$279$')
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY')
 DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-(&in^*8*x$#v)=o1!$&l!rfagb9q+r_#djfm6utbs-!hw$279$'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -59,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'chatbot.middleware.SentryErrorMiddleware',
 ]
 
 ROOT_URLCONF = 'chatbot_project.urls'
@@ -132,3 +127,19 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# chatbot_project/settings.py - Add at the very bottom
+
+import sentry_sdk
+
+sentry_sdk.init(
+    dsn="https://9802d6d901696307cc863ca60f25948e@o4511767543152640.ingest.de.sentry.io/4511767554293840",
+    # Add data like request headers and IP for users,
+    # see https://docs.sentry.io/platforms/python/data-management/data-collected/ for more info
+    send_default_pii=True,
+)
+
+
+
+# Quick-start development settings - unsuitable for production
+# See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
